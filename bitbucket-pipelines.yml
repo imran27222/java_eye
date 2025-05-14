@@ -1,0 +1,32 @@
+image: ubuntu
+pipelines:
+  branches:
+    main:
+      - step:
+          name: Build and Test
+          script:
+            # Build the Docker image
+            - docker build . --file Dockerfile --tag talhaultracodes/gfttreasure-backend:latest
+
+            # Log in to Docker Hub
+            - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
+
+            # Push the latest tag
+            - docker push talhaultracodes/gfttreasure-backend:latest
+
+            # Tag the image with the current commit hash and push it
+            - docker tag talhaultracodes/gfttreasure-backend:latest talhaultracodes/gfttreasure-backend:$BITBUCKET_COMMIT
+            - docker push talhaultracodes/gfttreasure-backend:$BITBUCKET_COMMIT
+
+            # Copy the .env.production file to the server and run the Dockerfile process
+            - pipe: atlassian/ssh-run:0.4.1
+              variables:
+                SSH_USER: root
+                SERVER: 46.202.194.29
+                COMMAND: "bash /root/docker-compose/nft-backend/backend.sh"
+          services:
+            - docker
+definitions:
+  services:
+    docker:
+      memory: 3072

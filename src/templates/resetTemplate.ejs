@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Your Password</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4; /* Subtle gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background: #ffffff; /* White container */
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin: auto;
+        }
+
+        .container h1 {
+            font-size: 24px;
+            color: #d35400; /* Burnt orange for heading */
+            margin-bottom: 15px;
+        }
+
+        .container p {
+            font-size: 14px;
+            color: #34495e; /* Dark blue-gray for text */
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 12px;
+            background-color: #e67e22; /* Vibrant orange for button */
+            color: #ffffff !important; /* White text */
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+            text-decoration: none; /* Remove underline */
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #d35400; /* Darker orange on hover */
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%; /* Slightly wider for tablets */
+                padding: 20px;
+            }
+
+            .container h1 {
+                font-size: 20px;
+            }
+
+            .container p {
+                font-size: 13px;
+            }
+
+            .btn {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                width: 90%; /* Wider on small devices */
+                padding: 15px;
+            }
+
+            .container h1 {
+                font-size: 18px;
+            }
+
+            .container p {
+                font-size: 12px;
+            }
+
+            .btn {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Reset Your Password</h1>
+        <p>We received a request to reset your password. Your Otp is </p>
+        <p><%= otp %></p>
+    </div>
+</body>
+</html>
