@@ -7,33 +7,46 @@ on:
 
 jobs:
   deploy:
-    name: Build and Deploy App to VPS
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup SSH to VPS
+      - name: Check VPS_HOST and VPS_USER
+        run: |
+          echo "VPS_HOST is set to: ${{ secrets.VPS_HOST }}"
+          echo "VPS_USER is set to: ${{ secrets.VPS_USER }}"
+
+      - name: Check if VPS_SSH_KEY is non-empty (do NOT print it)
+        run: |
+          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
+            echo "❌ VPS_SSH_KEY is empty or not set!"
+            exit 1
+          else
+            echo "✅ VPS_SSH_KEY is set and non-empty."
+          fi
+
+      - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/custom_rsa
-          echo "${{ secrets.VPS_SSH_KEY }}"
-          echo ${{ secrets.VPS_HOST }}
-
-
-          cat  ~/.ssh/custom_rsa
           chmod 600 ~/.ssh/custom_rsa
+          echo "🔐 SSH private key saved and permissions set."
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+          echo "🗝️ Known hosts updated with ${{ secrets.VPS_HOST }}"
 
-      - name: Sync project files to VPS
+      - name: Test SSH connection
         run: |
-          rsync -avz -e "ssh -i ~/.ssh/custom_rsa" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app
+          ssh -i ~/.ssh/custom_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "echo '✅ Connected to VPS'"
 
-      - name: SSH into VPS and deploy
-        run: |
-          ssh -i ~/.ssh/custom_rsa ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-            cd ~/app
-            docker-compose down
-            docker-compose up -d --build
-          EOF
+      - name: Log SSH test success
+        if: ${{ success() }}
+        run: echo "🎉 SSH connection test succeeded."
+
+      - name: Log SSH test failure
+        if: ${{ failure() }}
+        run: echo "❌ SSH connection test failed. Check keys and host."
+
+
+
+  
