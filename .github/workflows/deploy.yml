@@ -47,6 +47,11 @@ jobs:
         if: ${{ failure() }}
         run: echo "❌ SSH connection test failed. Check keys and host."
 
+      - name: Ensure target directory exists
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "mkdir -p /home/${{ secrets.VPS_USER }}/app"
+
+
       - name: Sync project files to VPS
         run: |
           rsync -avz -e "ssh -i ~/.ssh/id_rsa" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app
