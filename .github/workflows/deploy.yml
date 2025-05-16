@@ -56,9 +56,11 @@ jobs:
         run: |
           rsync -avz -e "ssh -i ~/.ssh/id_rsa" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app
             
-      - name: Copy .env.production to VPS
+      - name: Copy .env.development to VPS
         run: |
-            scp -i ~/.ssh/id_rsa .env.development ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app/.env.production
+            pwd
+            
+            scp -i ~/.ssh/id_rsa .env.development ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app/.env.development
 
       - name: SSH into VPS and deploy
         run: |
