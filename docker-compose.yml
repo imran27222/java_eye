@@ -18,10 +18,10 @@ services:
     container_name: mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: nft
-      MYSQL_USER: user
-      MYSQL_PASSWORD: userpass
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
@@ -34,6 +34,8 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
+    command: ["redis-server", "--requirepass", "root"]
+
    
 
 volumes:
