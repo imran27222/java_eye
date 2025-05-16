@@ -29,15 +29,15 @@ jobs:
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/custom_rsa
-          chmod 600 ~/.ssh/custom_rsa
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
           echo "🔐 SSH private key saved and permissions set."
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
           echo "🗝️ Known hosts updated with ${{ secrets.VPS_HOST }}"
 
       - name: Test SSH connection
         run: |
-          ssh -i ~/.ssh/custom_rsa -o StrictHostKeyChecking=no root@88.223.95.113 "echo '✅ Connected to VPS'"
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "echo '✅ Connected to VPS'"
 
       - name: Log SSH test success
         if: ${{ success() }}
