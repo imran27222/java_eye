@@ -19,16 +19,22 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: users
+      MYSQL_DATABASE: nft
       MYSQL_USER: user
       MYSQL_PASSWORD: userpass
     volumes:
       - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    
 
   redis:
     image: redis:alpine
     container_name: redis
     restart: unless-stopped
+    ports:
+      - "6379:6379"
+   
 
 volumes:
   mysql_data:
