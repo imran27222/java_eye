@@ -18,12 +18,17 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/custom_rsa
+          echo "${{ secrets.VPS_SSH_KEY }}"
+          echo ${{ secrets.VPS_HOST }}
+
+
+          cat  ~/.ssh/custom_rsa
           chmod 600 ~/.ssh/custom_rsa
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      # - name: Sync project files to VPS
-      #   run: |
-      #     rsync -avz -e "ssh -i ~/.ssh/custom_rsa" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app
+      - name: Sync project files to VPS
+        run: |
+          rsync -avz -e "ssh -i ~/.ssh/custom_rsa" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app
 
       - name: SSH into VPS and deploy
         run: |
