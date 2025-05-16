@@ -47,6 +47,17 @@ jobs:
         if: ${{ failure() }}
         run: echo "❌ SSH connection test failed. Check keys and host."
 
+      - name: Sync project files to VPS
+        run: |
+          rsync -avz -e "ssh -i ~/.ssh/id_rsa" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app
+      - name: SSH into VPS and deploy
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          cd ~/app
+          docker-compose down
+          docker-compose up -d --build
+          EOF
+
 
 
   
