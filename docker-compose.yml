@@ -10,7 +10,7 @@ services:
       - mysql
       - redis
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
     restart: unless-stopped
 
   mysql:
