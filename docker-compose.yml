@@ -13,7 +13,7 @@ services:
         condition: service_started
     environment:
       - NODE_ENV=development
-    # restart: unless-stopped
+    restart: unless-stopped
 
   mysql:
     image: mysql:8
