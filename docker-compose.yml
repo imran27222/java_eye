@@ -9,4 +9,12 @@ services:
     environment:
       - NODE_ENV=development
     restart: unless-stopped
+    networks:
+      - deploy_net
+
+
+networks:
+  deploy_net:
+    external: true
+
 

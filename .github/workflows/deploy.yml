@@ -68,7 +68,7 @@ jobs:
       - name: SSH into VPS and deploy
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-          cd /home/${{ secrets.VPS_USER }}/app
+          cd /home/java_eye/api/source
 
           docker-compose down
           docker-compose up -d --build
