@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-require("dotenv").config({ path: `./.env.development` });
+require("dotenv").config({ path: `./.env.${process.env.NODE_ENV}` });
 require("./src/utilities/queue");
 const authRoutes = require("./src/routes/auth.routes");
 const depositRoutes = require("./src/routes/deposit.routes");
@@ -14,7 +14,7 @@ app.set("view engine", "ejs");
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://api.gfttreasure.com", "https://www.gfttreasure.com", "https://gfttreasure.com", "https://gfttreasure.com/admin", "https://www.gfttreasure.com/admin"],
+    origin: "*",
     credentials: true,
   }),
 );

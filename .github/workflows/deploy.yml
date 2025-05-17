@@ -1,0 +1,75 @@
+name: Deploy to VPS without GitHub Deploy Key
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check VPS_HOST and VPS_USER
+        run: |
+          echo "VPS_HOST is set to: ${{ secrets.VPS_HOST }}"
+          echo "VPS_USER is set to: ${{ secrets.VPS_USER }}"
+
+      - name: Check if VPS_SSH_KEY is non-empty (do NOT print it)
+        run: |
+          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
+            echo "❌ VPS_SSH_KEY is empty or not set!"
+            exit 1
+          else
+            echo "✅ VPS_SSH_KEY is set and non-empty."
+          fi
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo "🔐 SSH private key saved and permissions set."
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+          echo "🗝️ Known hosts updated with ${{ secrets.VPS_HOST }}"
+
+      - name: Test SSH connection
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "echo '✅ Connected to VPS'"
+
+      - name: Log SSH test success
+        if: ${{ success() }}
+        run: echo "🎉 SSH connection test succeeded."
+
+      - name: Log SSH test failure
+        if: ${{ failure() }}
+        run: echo "❌ SSH connection test failed. Check keys and host."
+
+      - name: Ensure target directory exists
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "mkdir -p /home/java_eye/api/source"
+
+      - name: Clean source directory on VPS before sync
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+          "rm -rf /home/java_eye/api/source/* && echo '🧹 Cleaned /home/java_eye/api/source/'"
+
+      - name: Sync project files to VPS
+        run: |
+          rsync -avz -e "ssh -i ~/.ssh/id_rsa" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/java_eye/api/source
+
+      - name: Copy .env.production to VPS
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+          "cp /home/java_eye/api/.env /home/java_eye/api/source/.env.production && echo '📄 .env copied to .env.production in source dir'"
+
+      - name: SSH into VPS and deploy
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          cd /home/java_eye/api/source
+
+          docker-compose down
+          docker-compose up -d --build
+          EOF
