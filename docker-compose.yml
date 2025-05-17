@@ -6,11 +6,6 @@ services:
     container_name: java_eye_api
     ports:
       - "3000:3000"
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_started
     environment:
       - NODE_ENV=development
     restart: unless-stopped
