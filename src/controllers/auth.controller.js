@@ -34,13 +34,13 @@ const authController = {
             }
           );
           delete user[0].password;
-          const product = await ProductsModel.fetchLastPurchaseById(user[0].id);
+          // const product = await ProductsModel.fetchLastPurchaseById(user[0].id);
 
           return res.status(200).json({
             message: "Login successful",
             token: token,
             user: user[0],
-            lastPurchase: product ?? null,
+            // lastPurchase: product ?? null,
           });
         } else {
           return res.status(200).json({
@@ -138,7 +138,7 @@ const authController = {
       //   });
       // }
       // const referred_by = referredId?.[0]?.id ?? null;
-      const isUserExist = await AuthModel.fetchUser(req.body);
+      const isUserExist = await AuthModel.fetchUserForSignUp(req.body);
       if (isUserExist.length) {
         return res.status(200).json({
           message: "User already exist",

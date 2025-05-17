@@ -66,4 +66,4 @@ async function delOtp(userId) {
 
 
 
-module,exports = {connectRedis, setUserOtp, getUserOtp,delOtp}
+module.exports = {connectRedis, setUserOtp, getUserOtp,delOtp}

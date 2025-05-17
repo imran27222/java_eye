@@ -9,7 +9,7 @@ class DepositModel {
     this.status = obj.status || "pending";
     this.created_at = obj.created_at || new Date();
     this.updated_at = obj.updated_at;
-    this.deleted_at = obj.deleted_at;password
+    this.deleted_at = obj.deleted_at;
     this.deposit_amount = obj.deposit_amount || 0;
   }
   static async addDeposit(obj) {
