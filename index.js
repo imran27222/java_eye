@@ -11,7 +11,7 @@ const {
   connectRedis
 } = require("./src/utilities/redis");
 
-await connectRedis();
+connectRedis();
 
 const app = express();
 app.set("views", path.join(__dirname, "src/templates"));
