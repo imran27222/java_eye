@@ -1,10 +1,9 @@
 const Twilio = require("twilio");
 require("dotenv").config();
 
-const client = new Twilio(
-  process.env.TWILIO_ACCOUNTSID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+const accountSid = process.env.TWILIO_ACCOUNTSID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = require('twilio')(accountSid, authToken);
 
 const sendSms = async (body) => {
   try {
@@ -16,7 +15,7 @@ const sendSms = async (body) => {
     return { message: "sms has been sent" };
   } catch (e) {
     console.log(e);
-    return { error: e.message };
+    throw e;
   }
 };
 

@@ -9,15 +9,13 @@ router.post("/forget-password", authController.forgetPassword);
 router.post("/reset-password", authController.resetPassword);
 router.get("/by-accesstoken", authController.getUserByAccesstoken);
 router.get("/buy-summary", authController.buySummary);
-router.get("/verify-email", authController.verifyEmail);
-router.post("/send-verify-email", authController.resendVerifyEmail);
 router.get("/reference", verifyToken(["customer"]), authController.getReference);
 router.get("/", verifyToken(["customer"]), authController.fetchUser);
 router.put("/", verifyToken(["customer"]), authController.updatePassword);
 router.post("/admin-login", authController.adminLogin);
 // Otp Routes
-router.post("/verify-otp", authController.verifyOtp);
-router.post("/resend-otp", authController.resendOtp);
+router.post("/verify-otp", verifyToken(["customer"]), authController.verifyOtp);
+router.get("/resend-otp", verifyToken(["customer"]), authController.resendOtp);
 
 
 module.exports = router;

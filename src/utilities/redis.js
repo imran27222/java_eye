@@ -1,8 +1,11 @@
-const redis = require("redis");
-const client = redis.createClient({
+const {createClient} = require("redis");
+
+const client = createClient({
+  socket: {
     host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-    password: process.env.REDIS_PASSWORD,
+    port: Number(process.env.REDIS_PORT),
+  },
+  password: process.env.REDIS_PASSWORD
 });
 
 
@@ -17,7 +20,7 @@ async function connectRedis() {
 
 async function setUserOtp(userId, otp) {
     try {
-        await client.set(userId, JSON.stringify(otp));
+        await client.setEx(String(userId), 300, String(otp));
         console.log(`OTP set for user ${userId}`);
     } catch (error) {
         console.error(`Failed to set OTP for user ${userId}:`, error);
@@ -27,21 +30,9 @@ async function setUserOtp(userId, otp) {
 
 async function getUserOtp(userId, enteredOtp) {
   try {
-    const storedOtp = await client.get(userId);
-    console.log(`OTP retrieved for user ${userId}: ${storedOtp}`);
-
-    if (!storedOtp) {
-      console.log("OTP not found or expired");
-      return { success: false, message: "OTP not found or expired" };
-    }
-
-    if (storedOtp === enteredOtp) {
-      console.log("OTP matched successfully");
-      return { success: true };
-    } else {
-      console.log("OTP did not match");
-      return { success: false, message: "Invalid OTP" };
-    }
+    const storedOtp = await client.get(String(userId));
+    console.log(`OTP retrieved for user ${userId}:`, storedOtp);
+    return storedOtp;
   } catch (error) {
     console.error(`Failed to retrieve OTP for user ${userId}:`, error);
     throw error;

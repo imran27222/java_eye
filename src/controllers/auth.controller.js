@@ -12,7 +12,7 @@ const {
   connectRedis,
   setUserOtp,
   getUserOtp,
-  delOtp,
+  delOtp
 } = require("../utilities/redis");
 
 const authController = {
@@ -64,7 +64,7 @@ const authController = {
     try {
       const token = req.headers["x-auth-token"];
       if (!token) {
-        return res.status(403).send({ error: "No token provided" });
+        return res.status(200).send({ message: "No token provided" });
       }
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -81,14 +81,15 @@ const authController = {
           lastPurchase: product ?? null,
         });
       } else {
-        return res.status(404).json({
+        return res.status(200).json({
           message: "User does not exist",
         });
       }
     } catch (error) {
-      return res.status(500).json({
-        message: "Internal server error",
-        error: error.message,
+      console.error(error);
+      return res.status(200).json({
+        message:
+          "We are currently experiencing technical difficulties. Please try again later.",
       });
     }
   },
@@ -149,12 +150,12 @@ const authController = {
       req.body.password = hashedPassword;
       const userObj = new AuthModel(req.body);
       const user = await AuthModel.addUser(userObj);
-      // const token = jwt.sign({ id: user.insertId, role: "customer" }, process.env.JWT_SECRET, { expiresIn: "1h" });
+      const token = jwt.sign({ id: user.insertId, role: "customer" }, process.env.JWT_SECRET, { expiresIn: "1h" });
       const otp = generateOTP();
 
+      await setUserOtp(user.insertId, otp);
       // Generate Otp and send to email or phone number
 
-      // const verificationLink = `${process.env.API_URL}/api/auth/verify-email?token=${token}`;
       if (req.body.email) {
         const templatePath = path.join(
           __dirname,
@@ -165,15 +166,17 @@ const authController = {
         await sendEmail(email, "Verification Email", null, html);
         return res.status(201).json({
           message: "Verification OTP has been sent to your email address",
+          token
         });
       } else {
         const otp_body = {
           message: `Your otp for registration is ${otp}`,
           number: phone_number,
         };
-        sendSms(otp_body);
-        return res.status(201).json({
-          message: "Verification OTP has been sent to your mobile_number",
+        await sendSms(otp_body);
+        return res.status(200).json({
+          message: "Verification OTP has been sent to your mobile number",
+          token
         });
       }
     } catch (error) {
@@ -224,70 +227,12 @@ const authController = {
     }
   },
 
-  verifyEmail: async (req, res) => {
-    try {
-      const { token } = req.query;
-
-      // Verify the token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Update the user status in the database
-      const userId = decoded.id;
-      const is_verified = true;
-      await AuthModel.update(userId, { is_verified });
-
-      // Redirect to the web app with a token (optional)
-      const webAppRedirectURL = `${process.env.WEB_APP_URL}?token=${token}`;
-      return res.redirect(webAppRedirectURL);
-    } catch (error) {
-      return res.status(400).send({
-        message: "Invalid token",
-        error: error.message,
-      });
-    }
-  },
-  resendVerifyEmail: async (req, res) => {
-    try {
-      const { email } = req.body;
-      const isUserExist = await AuthModel.fetchUser(email);
-      if (isUserExist.length === 0) {
-        return res.status(400).json({
-          message: "User not exist, Incorrect email",
-        });
-      }
-
-      const token = jwt.sign(
-        { id: isUserExist[0].id, role: "customer" },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
-      );
-
-      // Create a verification link
-      const verificationLink = `${process.env.API_URL}/api/auth/verify-email?token=${token}`;
-
-      // Send email with the verification link
-      const data = await sendEmail(
-        email,
-        "Verification Email",
-        `Click the link to verify your email: ${verificationLink}`
-      );
-      return res.status(201).json({
-        message: "Verification Email has been sent to your email address",
-      });
-    } catch (error) {
-      return res.status(500).json({
-        message: "Internal server error",
-        error: error.message,
-      });
-    }
-  },
-
   fetchUser: async (req, res) => {
     try {
       const userId = req.userId;
       const user = await AuthModel.fetchUserById(userId);
       if (user.length === 0) {
-        return res.status(404).json({
+        return res.status(200).json({
           message: "User does not exist",
         });
       } else {
@@ -299,9 +244,10 @@ const authController = {
         return res.status(200).json(user);
       }
     } catch (error) {
-      return res.status(500).json({
-        message: "Internal server error",
-        error: error.message,
+      console.error(error);
+      return res.status(200).json({
+        message:
+          "We are currently experiencing technical difficulties. Please try again later.",
       });
     }
   },
@@ -338,9 +284,10 @@ const authController = {
         message: "Password updated successfully",
       });
     } catch (error) {
-      return res.status(500).json({
-        message: "Internal server error",
-        error: error.message,
+      console.error(error);
+      return res.status(200).json({
+        message:
+          "We are currently experiencing technical difficulties. Please try again later.",
       });
     }
   },
@@ -360,9 +307,10 @@ const authController = {
         });
       }
     } catch (error) {
-      return res.status(500).json({
-        message: "Internal server error",
-        error: error.message,
+      console.error(error);
+      return res.status(200).json({
+        message:
+          "We are currently experiencing technical difficulties. Please try again later.",
       });
     }
   },
@@ -401,9 +349,10 @@ const authController = {
         });
       }
     } catch (error) {
-      return res.status(500).json({
-        message: "Internal server error",
-        error: error.message,
+      console.error(error);
+      return res.status(200).json({
+        message:
+          "We are currently experiencing technical difficulties. Please try again later.",
       });
     }
   },
@@ -441,52 +390,54 @@ const authController = {
 
 
     } catch (error) {
-      return res.status(500).json({
-        message: "Internal server error",
-        error: error.message,
+      console.error(error);
+      return res.status(200).json({
+        message:
+          "We are currently experiencing technical difficulties. Please try again later.",
       });
     }
   },
   verifyOtp: async (req, res) => {
     try {
       const { otp } = req.body;
-      const token = req.query.token;
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const userId = decoded.id;
+      const userId = req.userId;
 
-      const { success } = await getUserOtp(userId, otp);
+      const result = await getUserOtp(userId);
 
-      if (success) {
-        await delOtp(userId);
-        const result = await AuthModel.updateIsVerified(userId);
-
+      if (result) {
+         if(Number(result) !== Number(otp)){
+          return res.status(200).json({
+            message: "Invalid OTP",
+          });
+         }
+        await AuthModel.updateIsVerified(userId , {is_verified : true});
         return res.status(200).json({
           message: "OTP verified successfully",
         });
       } else {
-        return res.status(400).json({
-          message: "OTP verification failed",
+        return res.status(200).json({
+          message: "Invalid Expired",
         });
       }
     } catch (error) {
-      return res.status(500).json({
-        message: "Internal server error",
-        error: error.message,
+      console.error(error);
+      return res.status(200).json({
+        message:
+          "We are currently experiencing technical difficulties. Please try again later.",
       });
     }
   },
   resendOtp: async (req, res) => {
     try {
-      const token = req.query.token;
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const userId = decoded.id;
+      const userId = req.userId;
 
       // Fetch user from DB
-      const user = await AuthModel.findUserById(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
+      const isUserExist = await AuthModel.fetchUserById(userId);
+      if (isUserExist.length === 0) {
+        return res.status(200).json({ message: "User not found" });
       }
-
+     console.log(isUserExist);
+     const user = isUserExist[0];
       // Generate a new OTP
       const otp = generateOTP();
 
@@ -494,12 +445,12 @@ const authController = {
       await setUserOtp(userId, otp);
 
       // Send OTP based on availability of contact info
-      if (user.phone_number) {
+      if (user.phone_number?.length) {
         await sendSms({
           number: user.phone_number,
           message: `Your OTP is: ${otp}`,
         });
-      } else if (user.email) {
+      } else if (user.email?.length) {
         const templatePath = path.join(
           __dirname,
           "../templates/verifyAccountTemplate.ejs"
@@ -508,14 +459,15 @@ const authController = {
 
         await sendEmail(email, "Verification Email", null, html);
       } else {
-        return res.status(400).json({ message: "User has no phone or email" });
+        return res.status(200).json({ message: "User has no phone or email" });
       }
 
-      return res.status(200).json({ message: "OTP resent successfully" });
+      return res.status(200).json({ message: "OTP sent successfully" });
     } catch (error) {
-      return res.status(500).json({
-        message: "Internal server error",
-        error: error.message,
+      console.error(error);
+      return res.status(200).json({
+        message:
+          "We are currently experiencing technical difficulties. Please try again later.",
       });
     }
   },
