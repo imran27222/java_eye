@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-require("dotenv").config({ path: `./.env.development` });
+require("dotenv").config({ path: `./.env.${process.env.NODE_ENV}` });
 require("./src/utilities/queue");
 const authRoutes = require("./src/routes/auth.routes");
 const depositRoutes = require("./src/routes/deposit.routes");
