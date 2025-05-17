@@ -51,6 +51,11 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "mkdir -p /home/java_eye/api/source"
 
+      - name: Clean source directory on VPS before sync
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+          "rm -rf /home/java_eye/api/source/* && echo '🧹 Cleaned /home/java_eye/api/source/'"
+
       - name: Sync project files to VPS
         run: |
           rsync -avz -e "ssh -i ~/.ssh/id_rsa" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/java_eye/api/source
