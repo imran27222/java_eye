@@ -7,11 +7,13 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       - NODE_ENV=development
-    restart: unless-stopped
+    # restart: unless-stopped
 
   mysql:
     image: mysql:8
@@ -25,11 +27,17 @@ services:
       - mysql_data:/var/lib/mysql
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     
 
   redis:
     image: redis:alpine
     container_name: redis
+    
     restart: unless-stopped
     ports:
       - "6379:6379"
