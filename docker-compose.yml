@@ -20,8 +20,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: nft
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
+    
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
