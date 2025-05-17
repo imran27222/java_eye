@@ -49,13 +49,15 @@ jobs:
 
       - name: Ensure target directory exists
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "mkdir -p /home/${{ secrets.VPS_USER }}/app"
-
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "mkdir -p /home/java_eye/api/source"
 
       - name: Sync project files to VPS
         run: |
-          rsync -avz -e "ssh -i ~/.ssh/id_rsa" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/app
-            
+          rsync -avz -e "ssh -i ~/.ssh/id_rsa" ./ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/java_eye/api/source
+
+      - name: Copy .env.production to VPS
+        run: |
+          scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no /home/java_eye/api/.env ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/java_eye/api/source/.env.production
 
       - name: SSH into VPS and deploy
         run: |
@@ -65,7 +67,3 @@ jobs:
           docker-compose down
           docker-compose up -d --build
           EOF
-
-
-
-  

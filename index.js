@@ -14,7 +14,7 @@ app.set("view engine", "ejs");
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://api.gfttreasure.com", "https://www.gfttreasure.com", "https://gfttreasure.com", "https://gfttreasure.com/admin", "https://www.gfttreasure.com/admin"],
+    origin: "*",
     credentials: true,
   }),
 );

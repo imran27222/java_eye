@@ -3,7 +3,7 @@ version: '3.8'
 services:
   app:
     build: .
-    container_name: node_app
+    container_name: java_eye_api
     ports:
       - "3000:3000"
     depends_on:
@@ -15,35 +15,3 @@ services:
       - NODE_ENV=development
     restart: unless-stopped
 
-  mysql:
-    image: mysql:8
-    container_name: mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: nft
-    
-    volumes:
-      - mysql_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    
-
-  redis:
-    image: redis:alpine
-    container_name: redis
-    
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    command: ["redis-server", "--requirepass", "root"]
-
-   
-
-volumes:
-  mysql_data:
