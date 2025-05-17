@@ -3,7 +3,7 @@ name: Deploy to VPS without GitHub Deploy Key
 on:
   push:
     branches:
-      - deployment_test
+      - main
 
 jobs:
   deploy:
