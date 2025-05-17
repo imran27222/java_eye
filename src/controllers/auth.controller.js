@@ -19,6 +19,7 @@ const authController = {
   login: async (req, res) => {
     try {
       const user = await AuthModel.fetchUser(req.body);
+      let password = req.body.password?.trim();
       if (user.length) {
         const isPasswordMatched = await bcrypt.compare(
           password,
@@ -129,7 +130,6 @@ const authController = {
 
   addUser: async (req, res) => {
     try {
-      connectRedis();
       const { userName, email, password, refCode, phone_number } = req.body;
       // const referredId = await AuthModel.fetchUserByReferenceCode(refCode);
       // if (refCode && !referredId.length) {
@@ -449,7 +449,6 @@ const authController = {
   },
   verifyOtp: async (req, res) => {
     try {
-      connectRedis();
       const { otp } = req.body;
       const token = req.query.token;
       const decoded = jwt.verify(token, process.env.JWT_SECRET);

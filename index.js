@@ -7,6 +7,11 @@ const authRoutes = require("./src/routes/auth.routes");
 const depositRoutes = require("./src/routes/deposit.routes");
 const withdrawalRoutes = require("./src/routes/withdrawal.routes");
 const purchaseRoutes = require("./src/routes/purchase.routes");
+const {
+  connectRedis
+} = require("./src/utilities/redis");
+
+await connectRedis();
 
 const app = express();
 app.set("views", path.join(__dirname, "src/templates"));
