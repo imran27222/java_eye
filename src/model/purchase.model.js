@@ -12,15 +12,17 @@ class PurchaseModel {
 
     // this.id = obj.id;
     this.purchase_number = obj.purchase_number || `PUR${dateB32}${timeB32}`;
-    this.purchase_amount = obj.purchase_amount;
-    this.profited_amount = obj.purchase_amount + obj.purchase_amount * 0.03;
+    this.purchase_amount = obj.purchase_amount || 0;
+    this.total_vouchers = obj.total_vouchers || 0;
+    // this.profited_amount = obj.purchase_amount + obj.purchase_amount * 0.03;
+    this.profited_amount = obj.profited_amount;
     this.fk_user_id = obj.fk_user_id;
     this.created_at = obj.created_at || new Date();
     this.updated_at = obj.updated_at;
     this.deleted_at = obj.deleted_at;
   }
 
-  static async addPurchase(purchaseObj, purchaseItemsObj) {
+  static async addPurchase(purchaseObj, purchaseItemsObj, totalVouchersToAdd) {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
@@ -36,6 +38,23 @@ class PurchaseModel {
           };
           await connection.query(`INSERT INTO purchase_items SET ?`, obj);
         }
+      }
+
+      if (purchaseObj.purchase_amount > 0) {
+        await connection.query(
+          `UPDATE users SET current_balance = current_balance - ${purchaseObj.purchase_amount} WHERE id = ${purchaseObj.fk_user_id}`
+        );
+        
+      }
+
+      if (purchaseObj.total_vouchers > 0) {
+        await connection.query(
+          `UPDATE users SET total_vouchers = total_vouchers - ${purchaseObj.total_vouchers} WHERE id = ${purchaseObj.fk_user_id}`
+        );
+
+        await connection.query(
+          `UPDATE users SET total_vouchers = total_vouchers + ${totalVouchersToAdd} WHERE id = ${purchaseObj.fk_user_id}`
+        );
       }
       await connection.commit();
 

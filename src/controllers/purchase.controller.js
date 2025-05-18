@@ -11,36 +11,43 @@ const purchaseController = {
       const lastProduct = await PurchaseModel.fetchLastPurchaseById(userId);
 
       if (lastProduct) {
-        return res.status(400).json({
+        return res.status(200).json({
           message: "You can only buy a product once every 24 hours.",
         });
       }
       const user = await AuthModel.fetchUserById(userId);
-      if (user[0].current_balance < payload.purchase_amount) {
-        return res.status(400).json({
-          message: "Insufficient balance",
-        });
-      }
+
       if (payload.items.length === 0) {
-        return res.status(400).json({
+        return res.status(200).json({
           message: "Please select atleast one item to buy",
         });
       }
-      const purchase = new PurchaseModel({ purchase_amount: payload.purchase_amount, fk_user_id: userId });
-      const product = await PurchaseModel.addPurchase(purchase, payload.items);
+
+      if (payload.payment_type === "balance" && user[0].current_balance < payload.purchase_amount) {
+        return res.status(200).json({
+          message: "Insufficient balance",
+        });
+      }
+      let totalVouchersToAdd = 0;
+
+      if (payload.items.length % 2 === 0 && payload.items.length > 0) {
+        totalVouchersToAdd = Math.floor((payload?.items.length)/2)
+      }
+
+      if (payload.payment_type === "voucher" && user[0].total_vouchers < payload.total_vouchers) {
+        return res.status(200).json({
+          message: "Insufficient vouchers",
+        });
+      }
+     
+      const purchase = new PurchaseModel({ purchase_amount: payload.purchase_amount, fk_user_id: userId, total_vouchers: payload.total_vouchers, profited_amount: payload.profited_amount });
+      const product = await PurchaseModel.addPurchase(purchase, payload.items, totalVouchersToAdd);
       if (product.insertId === 0) {
-        return res.status(400).send({
+        return res.status(200).send({
           message: "Unable to buy product",
         });
       } else {
         purchase.id = product.insertId;
-
-        const user = await AuthModel.update(userId, payload);
-        if (user.affectedRows === 0) {
-          return res.status(400).send({
-            message: "Unable to update user wallet",
-          });
-        }
 
         await addWalletUpdateJob(userId, purchase);
         return res.status(200).send({
@@ -56,10 +63,10 @@ const purchaseController = {
         });
       }
     } catch (error) {
-      console.log(error);
-      return res.status(500).send({
-        message: "Internal server error",
-        error: error.message,
+      console.error(error);
+      return res.status(200).json({
+        message:
+          "We are currently experiencing technical difficulties. Please try again later.",
       });
     }
   },

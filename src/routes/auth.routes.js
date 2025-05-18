@@ -10,7 +10,7 @@ router.post("/reset-password", authController.resetPassword);
 router.get("/by-accesstoken", authController.getUserByAccesstoken);
 router.get("/buy-summary", authController.buySummary);
 router.get("/reference", verifyToken(["customer"]), authController.getReference);
-router.get("/", verifyToken(["customer"]), authController.fetchUser);
+router.get("/user", verifyToken(["customer"]), authController.fetchUser);
 router.put("/", verifyToken(["customer"]), authController.updatePassword);
 router.post("/admin-login", authController.adminLogin);
 // Otp Routes

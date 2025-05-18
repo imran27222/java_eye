@@ -34,13 +34,13 @@ const authController = {
             }
           );
           delete user[0].password;
-          // const product = await ProductsModel.fetchLastPurchaseById(user[0].id);
+          const product = await ProductsModel.fetchLastPurchaseById(user[0].id);
 
           return res.status(200).json({
             message: "Login successful",
             token: token,
             user: user[0],
-            // lastPurchase: product ?? null,
+            lastPurchase: product ?? null,
           });
         } else {
           return res.status(200).json({
@@ -132,13 +132,13 @@ const authController = {
   addUser: async (req, res) => {
     try {
       const { userName, email, password, refCode, phone_number } = req.body;
-      // const referredId = await AuthModel.fetchUserByReferenceCode(refCode);
-      // if (refCode && !referredId.length) {
-      //   return res.status(400).json({
-      //     message: "Invalid Reference Code!!",
-      //   });
-      // }
-      // const referred_by = referredId?.[0]?.id ?? null;
+      const referredId = await AuthModel.fetchUserByReferenceCode(refCode);
+      if (refCode && !referredId.length) {
+        return res.status(400).json({
+          message: "Invalid Reference Code!!",
+        });
+      }
+      const referred_by = referredId?.[0]?.id ?? null;
       const isUserExist = await AuthModel.fetchUserForSignUp(req.body);
       if (isUserExist.length) {
         return res.status(200).json({
@@ -148,6 +148,7 @@ const authController = {
 
       const hashedPassword = await bcrypt.hash(password, 10);
       req.body.password = hashedPassword;
+      req.body.referred_by = referred_by;
       const userObj = new AuthModel(req.body);
       const user = await AuthModel.addUser(userObj);
       const token = jwt.sign({ id: user.insertId, role: "customer" }, process.env.JWT_SECRET, { expiresIn: "1h" });
@@ -201,7 +202,6 @@ const authController = {
         const otp = generateOTP();
         const userId = user.id;
         await setUserOtp(userId,otp);
-        // const verificationLink = `${process.env.WEB_APP_URL}/set-password?token=${token}`;
         const templatePath = path.join(
           __dirname,
           "../templates/resetTemplate.ejs"
@@ -241,7 +241,7 @@ const authController = {
 
         user[0].lastPurchase = product ?? null;
 
-        return res.status(200).json(user);
+        return res.status(200).json({user});
       }
     } catch (error) {
       console.error(error);
@@ -276,7 +276,7 @@ const authController = {
         password: hashedPassword,
       });
       if (user.affectedRows === 0) {
-        return res.status(400).json({
+        return res.status(200).json({
           message: "Unable to update password",
         });
       }
@@ -302,7 +302,7 @@ const authController = {
           code: user[0].reference_code,
         });
       } else {
-        return res.status(400).json({
+        return res.status(200).json({
           message: "Unable to fetch reference",
         });
       }
