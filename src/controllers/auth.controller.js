@@ -436,7 +436,7 @@ const authController = {
       if (isUserExist.length === 0) {
         return res.status(200).json({ message: "User not found" });
       }
-     console.log(isUserExist);
+
      const user = isUserExist[0];
       // Generate a new OTP
       const otp = generateOTP();
@@ -457,7 +457,7 @@ const authController = {
         );
         const html = await ejs.renderFile(templatePath, { otp });
 
-        await sendEmail(email, "Verification Email", null, html);
+        await sendEmail(user.email, "Verification Email", null, html);
       } else {
         return res.status(200).json({ message: "User has no phone or email" });
       }
