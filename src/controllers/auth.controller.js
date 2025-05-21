@@ -131,6 +131,7 @@ const authController = {
 
   addUser: async (req, res) => {
     try {
+      console.log(req.body, "!!!!!!!!!!!!!!!!!!!");
       const { userName, email, password, refCode, phone_number } = req.body;
       const referredId = await AuthModel.fetchUserByReferenceCode(refCode);
       if (refCode && !referredId.length) {
@@ -149,6 +150,7 @@ const authController = {
       const hashedPassword = await bcrypt.hash(password, 10);
       req.body.password = hashedPassword;
       req.body.referred_by = referred_by;
+      req.body?.email && req.body?.email?.length > 0  ? req.body.phone_number = null : req.body.email = null;
       const userObj = new AuthModel(req.body);
       const user = await AuthModel.addUser(userObj);
       const token = jwt.sign({ id: user.insertId, role: "customer" }, process.env.JWT_SECRET, { expiresIn: "1h" });
