@@ -140,6 +140,24 @@ class PurchaseModel {
       throw error;
     }
   }
+
+  static async fetchAllPurchaseItems(id, page = 1, size = 10) {
+    try {
+      const [rows] = await db.query(`SELECT * FROM purchase p JOIN purchase_items pi ON pi.purchase_id = p.id  WHERE p.fk_user_id = ${id} AND p.deleted_at is NULL ORDER BY p.created_at DESC`);
+      const [count] = await db.query(`SELECT COUNT(*) as count FROM purchase p JOIN purchase_items pi ON pi.purchase_id = p.id  WHERE p.fk_user_id = ${id} AND p.deleted_at is NULL`);
+      return {
+        purchases: rows,
+        pagination: {
+          current_page: page,
+          size: size,
+          total_items: count[0].count,
+          no_of_pages: size ? Math.ceil(count[0].count / +size) : 1,
+        },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 module.exports = PurchaseModel;

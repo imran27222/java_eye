@@ -70,6 +70,19 @@ const purchaseController = {
       });
     }
   },
+  getAllPurchases: async (req, res) => {
+    try {
+      const {page, size} = req.query
+      const purchases = await PurchaseModel.fetchAllPurchaseItems(req.userId, page, size);
+      return res.status(200).json(purchases);
+    } catch (error) {
+      console.error(error);
+      return res.status(200).json({
+        message:
+          "We are currently experiencing technical difficulties. Please try again later.",
+      });
+    }
+  },
 };
 
 module.exports = purchaseController;
