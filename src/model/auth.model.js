@@ -14,6 +14,7 @@ class UserModel {
     this.deleted_at = obj.deleted_at;
     this.referred_by = obj.referred_by;
     this.reference_code = generateUniqueHash();
+    this.is_admin = false;
   }
 
   static async fetchUser(userPayload) {
