@@ -117,7 +117,7 @@ class UserModel {
 
   static async getReference(id) {
     try {
-      const query = `SELECT u1.id, u1.userName, u1.email, u1.current_balance, u1.created_at FROM users u LEFT JOIN users u1 ON u.id = u1.referred_by WHERE u.id = ${id}  AND u1.referred_by IS NOT NULL AND u1.is_verified = 1`;
+      const query = `SELECT u1.id, u1.email, u1.current_balance, u1.total_vouchers, u1.created_at FROM users u LEFT JOIN users u1 ON u.id = u1.referred_by WHERE u.id = ${id}  AND u1.referred_by IS NOT NULL AND u1.is_verified = 1`;
       const [rows] = await db.query(query);
       return rows;
     } catch (error) {
