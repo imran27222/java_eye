@@ -169,7 +169,7 @@ const authController = {
         // await sendEmail(email, "Verification Email", null, html);
         return res.status(201).json({
           message: "Successfully registered",
-          user,
+          userObj,
           token
         });
       } else {
