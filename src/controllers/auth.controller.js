@@ -160,15 +160,16 @@ const authController = {
       // Generate Otp and send to email or phone number
 
       if (req.body.email) {
-        const templatePath = path.join(
-          __dirname,
-          "../templates/verifyAccountTemplate.ejs"
-        );
-        const html = await ejs.renderFile(templatePath, { otp });
+        // const templatePath = path.join(
+        //   __dirname,
+        //   "../templates/verifyAccountTemplate.ejs"
+        // );
+        // const html = await ejs.renderFile(templatePath, { otp });
 
-        await sendEmail(email, "Verification Email", null, html);
+        // await sendEmail(email, "Verification Email", null, html);
         return res.status(201).json({
-          message: "Verification OTP has been sent to your email address",
+          message: "Successfully registered",
+          user,
           token
         });
       } else {
